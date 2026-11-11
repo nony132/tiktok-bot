@@ -9,13 +9,13 @@ server = Flask(__name__)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Hello! Send me a TikTok link.")
+    bot.reply_to(message, "Bot is ready!")
 
 @bot.message_handler(func=lambda message: True)
 def download_tiktok(message):
     url = message.text.strip()
     if "tiktok.com" not in url:
-        bot.reply_to(message, "Please send a valid TikTok link.")
+        bot.reply_to(message, "Send a valid TikTok link.")
         return
 
     msg = bot.reply_to(message, "Downloading...")
@@ -25,6 +25,10 @@ def download_tiktok(message):
         'outtmpl': 'video.mp4',
         'quiet': True,
         'no_warnings': True,
+        'extractor_args': {'tiktok': {'web_api': ['ios', 'android']}},
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
     }
 
     try:
@@ -40,7 +44,7 @@ def download_tiktok(message):
             os.remove(video_file)
             
     except Exception as e:
-        bot.edit_message_text("Error downloading video.", message.chat.id, msg.message_id)
+        bot.edit_message_text(f"Error: {str(e)[:60]}", message.chat.id, msg.message_id)
 
 @server.route('/' + TOKEN, methods=['POST'])
 def getMessage():
